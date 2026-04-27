@@ -3,13 +3,18 @@ import argparse
 from tqdm import tqdm
 from pathlib import Path
 from imagededup.methods import CNN, PHash
+from imagededup.utils.models import CustomModel
+from svp_custom.utils import EfficientNet_V2L
 
 
 def main(args):
     if args.encoder == 'PHash':
         args.encoder = PHash()
     elif args.encoder == 'CNN':
-        args.encoder = CNN()
+        # args.encoder = CNN()
+        args.encoder = CNN(model_config=CustomModel(
+            model=EfficientNet_V2L(), transform=EfficientNet_V2L.transform, name=EfficientNet_V2L.name)
+        )
 
     duplicates = args.encoder.find_duplicates_to_remove(
         image_dir=args.image_dir,
@@ -40,11 +45,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--image_dir', type=str,
                         # required=True,
-                        default='/home/vid/hdd/file/project/263-КоникаМинольта/5-Danon/video/0611/imgs/5865_mistakes_to_s003_from_s003_detobj/milk_truck/20240625_1.4_поручень,мутовка,секции/4_2024-06-25_22-50-38_8211.mkv_ws_w/0',
+                        default='/home/spolyakov/Downloads/other/special_types_cars/proj_spec_vehicles/sup23385/taxi',
                         help='images directory source path (required)')
-    parser.add_argument('-e', '--encoder', choices=['CNN', 'PHash'], default='CNN', help='')
-    parser.add_argument('-t', '--thresh', type=float, default=0.99, help='')
+    parser.add_argument('-t', '--thresh', type=float, default=0.95, help='')  # 0.95
     parser.add_argument('-m', '--mode', choices=['copy', 'move'], default='move', help='')
+    parser.add_argument('-e', '--encoder', choices=['CNN', 'PHash'], default='CNN', help='')
     parser.add_argument('-s', '--suffix', choices=['txt', 'json', '-'], default='-', help='')
     parser.add_argument('-w', '--workers', type=int, default=15, help='')
     args = parser.parse_args()
